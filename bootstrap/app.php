@@ -74,7 +74,7 @@ $app->register(Tymon\JWTAuth\Providers\LumenServiceProvider::class); //
 |--------------------------------------------------------------------------
 */
 $app->middleware([
-    // Add any global middleware if needed
+    App\Http\Middleware\ExampleMiddleware::class,
 ]);
 
 $app->routeMiddleware([

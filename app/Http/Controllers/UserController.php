@@ -2,46 +2,54 @@
 
 namespace App\Http\Controllers;
 
-use Laravel\Lumen\Routing\Controller as BaseController;
-use Illuminate\Http\Request;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
+use App\Traits\ApiResponser;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use DB;
 
-class UserController extends BaseController {
-    
-    public function index() {
-        return response()->json(User::all(), 200);
+class UserController extends Controller
+{
+    use ApiResponser;
+
+    private $request;
+
+    public function __construct(Request $request)
+    {
+        $this->request = $request;
     }
 
-    public function store(Request $request) {
-        try {
-            $this->validate($request, [
-                'name' => 'required|string|max:255',
-                'username' => 'required|string|max:255|unique:users',
-                'email' => 'required|string|email|max:255|unique:users',
-                'password' => 'required|string|min:6',
-                'gender' => 'required|string|in:Male,Female,Other'
-            ]);
+    public function getUsers()
+    {
+        // Using raw SQL query instead of Eloquent
+        $users = DB::connection('mysql')
+            ->select("SELECT * FROM tbluser");
 
-            // Create a new user
-            $user = User::create([
-                'name' => $request->name,
-                'username' => $request->username,
-                'email' => $request->email,
-                'password' => Hash::make($request->password), // Fixed bcrypt error
-                'gender' => $request->gender
-            ]);
+        return $this->successResponse($users);
+    }
 
-            return response()->json([
-                'message' => 'User created successfully!',
-                'user' => $user
-            ], 201);
+    public function index()
+    {
+        $users = User::all();
+        return $this->successResponse($users);
+    }
 
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'User registration failed!',
-                'error' => $e->getMessage()
-            ], 500);
-        }
+    public function show($id)
+    {
+        $user = User::findOrFail($id);
+            return $this->successResponse($user);
+    }
+    
+    public function add(Request $request)
+    {
+        $rules = [
+            'username' => 'required|max:20',
+            'password' => 'required|max:20',
+            'gender' => 'required|in:Male,Female'
+        ];
+
+        $this->validate($request, $rules);
+        $user = User::create($request->all());
+        return $this->successResponse($user, Response:: HTTP_CREATED);
     }
 }
