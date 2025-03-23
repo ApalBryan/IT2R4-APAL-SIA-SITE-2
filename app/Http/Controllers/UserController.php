@@ -31,8 +31,13 @@ class UserController extends Controller
     public function index()
     {
         $users = User::all();
-        return $this->successResponse($users);
+        return response()->json([
+            'data' => $users->values(),
+            'site' => 2
+        ]);
     }
+    
+    
 
     public function show($id)
     {
@@ -52,4 +57,35 @@ class UserController extends Controller
         $user = User::create($request->all());
         return $this->successResponse($user, Response:: HTTP_CREATED);
     }
+    public function update(Request $request, $id)
+    {
+         $rules = [
+        'username' => 'max:20',
+        'password' => 'max:20',
+        'gender' => 'in:Male,Female',
+    ];
+
+         $this->validate($request, $rules);
+         $user = User::findOrFail($id);
+
+         $user->fill($request->all());
+
+    // If no changes happen
+    if ($user->isClean()) {
+        return $this->errorResponse('At least one value must change', Response::HTTP_UNPROCESSABLE_ENTITY);
+    }
+
+    $user->save();
+    return $this->successResponse($user);
+    }
+
+    public function delete($id)
+    {
+        $user = User::findOrFail($id);
+        $user->delete();
+    
+        return $this->successResponse($user);
+    }
+     
+
 }
