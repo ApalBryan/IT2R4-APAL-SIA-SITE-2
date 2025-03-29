@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Userjob;
 use App\Traits\ApiResponser;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -36,7 +37,6 @@ class UserController extends Controller
             'site' => 2
         ]);
     }
-    
 
     public function show($id)
     {
@@ -49,10 +49,13 @@ class UserController extends Controller
         $rules = [
             'username' => 'required|max:20',
             'password' => 'required|max:20',
-            'gender' => 'required|in:Male,Female'
+            'gender' => 'required|in:Male,Female',
+            'jobid' => 'required|numeric|min:0|not_in:0',
         ];
 
         $this->validate($request, $rules);
+
+        $userjob = UserJob::findOrFail($request->jobid);
         $user = User::create($request->all());
         return $this->successResponse($user, Response:: HTTP_CREATED);
     }
