@@ -11,6 +11,7 @@
         "illuminate/auth": "^10.48",
         "laravel/lumen-framework": "^10.0",
         "laravel/tinker": "^2.10",
+        "ext-mysqli": "*",
         "tymon/jwt-auth": "^2.2"
     },
     "require-dev": {
